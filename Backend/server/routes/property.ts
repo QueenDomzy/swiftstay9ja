@@ -60,7 +60,7 @@ router.get("/", async (_req: Request, res: Response) => {
     });
 
     if (!properties || properties.length === 0) {
-      return res.status(404).json({ message: "No properties found" });
+      return res.status(200).json({ message: "No properties found" });
     }
 
     res.status(200).json(properties);
@@ -80,7 +80,7 @@ router.get("/:id", param("id").isInt(), async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
     const property = await prisma.property.findUnique({ where: { id } });
-    if (!property) return res.status(404).json({ error: "Property not found" });
+    if (!property) return res.status(200).json({ error: "Property not found" });
 
     res.status(200).json(property);
   } catch (err) {
