@@ -1,3 +1,4 @@
+// server/index.ts
 import express, { Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -23,7 +24,17 @@ const app = express();
 // --------------------
 // Middleware
 // --------------------
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // frontend dev
+      "https://swiftstaynigeria-frontend.onrender.com", // production frontend
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -43,8 +54,8 @@ app.use("/api/user", authenticate, userRoutes);
 // --------------------
 // Health Check
 // --------------------
-app.get("/", (req: Request, res: Response) => {
-  res.send("🚀 SwiftStayNig Backend Running ✅");
+app.get("/", (_req: Request, res: Response) => {
+  res.status(200).send("🚀 SwiftStayNig Backend Running ✅");
 });
 
 // --------------------
@@ -54,13 +65,14 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   console.error("Global error handler:", err);
   res.status(err.status || 500).json({
     error: err.message || "Internal Server Error",
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 });
 
 // --------------------
 // Start Server
 // --------------------
-const PORT = process.env.PORT || 5003;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+const PORT = Number(process.env.PORT) || 5003;
+app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
 
 export default app;
